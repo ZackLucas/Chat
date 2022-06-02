@@ -1,8 +1,20 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { NestExpressApplication } from '@nestjs/platform-express'
+import { config } from 'dotenv'
+import { json, urlencoded } from 'express'
+import helmet from 'helmet'
+
+import { AppModule } from '@/core/protocols';
+
+config()
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  await app.listen(3000);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.use(helmet())
+  app.use(json({ limit: '2mb' }))
+  app.use(urlencoded({ extended: true, limit: '2mb' }))
+  
+  await app.listen(process.env.APP_SERVER_PORT);
 }
 bootstrap();
